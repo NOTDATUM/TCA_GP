@@ -71,12 +71,21 @@ def main():
             break
     
         win.fill(WHITE)
-        timepass(Person.PersonList[slc])
         if not(game.connected()):
             font = pygame.font.SysFont("Sans", 80)
             text = font.render("Logined", 1, (255,255,255), True)
             win.blit(text, (SCREEN_X/2 - text.get_width()/2, SCREEN_Y/2 - text.get_height()/2))
         else:
+            Person.PersonList[slc].move()
+
+            for i in range(len(Bullet.BulletList)):
+                for j in range(3):
+                    if distance(game.p2_info[j], Bullet.BulletList[i].loc) < 20:
+                        n.send("hit "+str(i))
+
+                Bullet.BulletList[i].move()
+                n.send("bullet " + str(Bullet.BulletList[i].loc[0]) + " " + str(Bullet.BulletList[i].loc[1]) + " " + str(i))
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     run = False
@@ -95,21 +104,46 @@ def main():
                             compare_distance = mouse_psn_distance
                             slc = i
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-                    Person.shoot(angle(Person.PersonList[slc].get_loc(), pygame.mouse.get_pos()))
+                    Person.PersonList[slc].shoot(angle(Person.PersonList[slc].loc, pygame.mouse.get_pos()))
                             
+            for i in range(len(Bullet.BulletList)):
+                pygame.draw.circle(win, color, (Bullet.BulletList[i].loc[0], Bullet.BulletList[i].loc[1]), 3)
+                n.send("delete " + str(Bullet.BulletList[i].check()))
             
-            pygame.draw.circle(win, color, (Person.PersonList[0].loc[0], Person.PersonList[0].loc[1]), 20)
-            pygame.draw.circle(win, color, (Person.PersonList[1].loc[0], Person.PersonList[1].loc[1]), 20)
-            pygame.draw.circle(win, color, (Person.PersonList[2].loc[0], Person.PersonList[2].loc[1]), 20)
+            if player == 0:
+                for j in range(len(game.p1_bullets)):
+                    pygame.draw.circle(win, op_color, (game.p1_bullets[j][0], game.p1_bullets[j][1]), 3)
+            else:
+                for j in range(len(game.p2_bullets)):
+                    pygame.draw.circle(win, op_color, (game.p2_bullets[j][0], game.p2_bullets[j][1]), 3)
+            
             n.send("move "+str(Person.PersonList[slc].loc[0])+" "+ str(Person.PersonList[slc].loc[1])+" "+str(slc))
             if player == 0:
-                pygame.draw.circle(win, op_color, (game.p1_info[0][0], game.p1_info[0][1]), 20)
-                pygame.draw.circle(win, op_color, (game.p1_info[1][0], game.p1_info[1][1]), 20)
-                pygame.draw.circle(win, op_color, (game.p1_info[2][0], game.p1_info[2][1]), 20)
+                if game.p1_hp[0]:
+                    pygame.draw.circle(win, op_color, (game.p1_info[0][0], game.p1_info[0][1]), 20)
+                if game.p1_hp[1]:
+                    pygame.draw.circle(win, op_color, (game.p1_info[1][0], game.p1_info[1][1]), 20)
+                if game.p1_hp[2]:
+                    pygame.draw.circle(win, op_color, (game.p1_info[2][0], game.p1_info[2][1]), 20)
+                if game.p2_hp[0]:
+                    pygame.draw.circle(win, color, (Person.PersonList[0].loc[0], Person.PersonList[0].loc[1]), 20)
+                if game.p2_hp[1]:    
+                    pygame.draw.circle(win, color, (Person.PersonList[1].loc[0], Person.PersonList[1].loc[1]), 20)
+                if game.p2_hp[2]:    
+                    pygame.draw.circle(win, color, (Person.PersonList[2].loc[0], Person.PersonList[2].loc[1]), 20)
             else:
-                pygame.draw.circle(win, op_color, (game.p2_info[0][0], game.p2_info[0][1]), 20)
-                pygame.draw.circle(win, op_color, (game.p2_info[1][0], game.p2_info[1][1]), 20)
-                pygame.draw.circle(win, op_color, (game.p2_info[2][0], game.p2_info[2][1]), 20)
+                if game.p2_hp[0]:
+                    pygame.draw.circle(win, op_color, (game.p2_info[0][0], game.p2_info[0][1]), 20)
+                if game.p2_hp[1]:    
+                    pygame.draw.circle(win, op_color, (game.p2_info[1][0], game.p2_info[1][1]), 20)
+                if game.p2_hp[2]:
+                    pygame.draw.circle(win, op_color, (game.p2_info[2][0], game.p2_info[2][1]), 20)
+                if game.p1_hp[0]:
+                    pygame.draw.circle(win, color, (Person.PersonList[0].loc[0], Person.PersonList[0].loc[1]), 20)
+                if game.p1_hp[1]:    
+                    pygame.draw.circle(win, color, (Person.PersonList[1].loc[0], Person.PersonList[1].loc[1]), 20)
+                if game.p1_hp[2]:    
+                    pygame.draw.circle(win, color, (Person.PersonList[2].loc[0], Person.PersonList[2].loc[1]), 20)
 
         pygame.display.update()
 

@@ -2,8 +2,6 @@ import math
 
 MAX_HP = 100
 DAMAGE = 10
-MAX_BULLET = 2
-SHOT_COOLTIME = 100
 SCREEN_X = 1200
 SCREEN_Y = 750
 SPEED = 1.5
@@ -22,7 +20,7 @@ def angle(p_0, p):  # p_0에서 p까지 측정한 각도, 범위는 -pi/2 ~ 3pi/
             ang = math.atan((y_0 - y) / (x_0 - x)) + math.pi
     return ang
 
-def distance(p_1, p_2):  # 두 점 사이 거리 반환
+def distance(p_1, p_2):
     return ((p_1[0] - p_2[0]) ** 2 + (p_1[1] - p_2[1]) ** 2) ** 0.5
 
 class Person:
@@ -35,9 +33,6 @@ class Person:
         self.nex = [init[0], init[1]]
         self.hp = MAX_HP
         self.dmg = DAMAGE
-        self.bts = MAX_BULLET
-        self.ctm = SHOT_COOLTIME
-        self.isW = False
         self.v = SPEED
 
     def next(self, next):
@@ -54,20 +49,26 @@ class Person:
         return self.loc
 
     def shoot(self, ang):
-        if self.bts > 0:
-            self.bts -= 0
-            self.ctm = 0
-            Bullet(self.get_loc(), ang, 30)
+        Bullet(*self.loc, ang, 10)
 
 class Bullet:
     BulletList = []
 
-    def __init__(self, init, angle, v):
-        self.loc = init
-        self.ang = angle
+    def __init__(self, x, y, angle, v):
+        self.loc = [x, y]
+        self.angle = angle
         self.v = v
+        self.no = len(Bullet.BulletList)
         Bullet.BulletList.append(self)
 
     def move(self):
-        self.pos[0] += self.v * math.cos(self.angle) / 3.5
-        self.pos[1] += self.v * math.sin(self.angle) / 3.5
+        self.loc[0] += self.v * math.cos(self.angle)
+        self.loc[1] += self.v * math.sin(self.angle)
+    
+    def check(self):
+        if self.loc[0] < 0 or self.loc[0] > SCREEN_X or self.loc[1] < 0 or self.loc[1] > SCREEN_Y:
+            number = self.no
+            del self
+            return number
+        else:
+            return "none"
